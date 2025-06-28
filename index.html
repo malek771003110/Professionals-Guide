@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>البحث عن الأشخاص حسب المهنة والمنطقة</title>
   <link rel="stylesheet" href="project.css" />
 </head>
@@ -28,7 +28,67 @@
       </select>
     </div>
 
-    <div id="personList"></div>
+    <div id="personList">
+
+      <!-- الأشخاص الأصليين -->
+
+      <div class="person visible" data-city="عمان">
+        <div class="card-header">
+          <h2>محمد</h2>
+          <div class="actions">
+            <button class="open-btn">عرض التفاصيل</button>
+            <button class="close-btn hidden">إغلاق التفاصيل</button>
+            <button class="call-btn" onclick="window.location.href='tel:0791234567'">اتصل الآن</button>
+            <button class="whatsapp-btn" onclick="window.open('https://wa.me/962791234567', '_blank')">راسل عبر واتساب</button>
+          </div>
+        </div>
+        <p>مصمم جرافيك محترف يعمل في شركة تصميم.</p>
+        <div class="details">
+          <p><strong>رقم الهاتف:</strong> 0791234567</p>
+          <p><strong>مكان السكن:</strong> عمّان</p>
+          <p><strong>المهنة:</strong> مصمم جرافيك</p>
+        </div>
+      </div>
+
+      <div class="person visible" data-city="الزرقاء">
+        <div class="card-header">
+          <h2>ليلى</h2>
+          <div class="actions">
+            <button class="open-btn">عرض التفاصيل</button>
+            <button class="close-btn hidden">إغلاق التفاصيل</button>
+            <button class="call-btn" onclick="window.location.href='tel:0789876543'">اتصل الآن</button>
+            <button class="whatsapp-btn" onclick="window.open('https://wa.me/962789876543', '_blank')">راسل عبر واتساب</button>
+          </div>
+        </div>
+        <p>مطور ويب تهتم بإنشاء مواقع حديثة.</p>
+        <div class="details">
+          <p><strong>رقم الهاتف:</strong> 0789876543</p>
+          <p><strong>مكان السكن:</strong> الزرقاء</p>
+          <p><strong>المهنة:</strong> مطور ويب</p>
+        </div>
+      </div>
+
+      <div class="person visible" data-city="إربد">
+        <div class="card-header">
+          <h2>أحمد</h2>
+          <div class="actions">
+            <button class="open-btn">عرض التفاصيل</button>
+            <button class="close-btn hidden">إغلاق التفاصيل</button>
+            <button class="call-btn" onclick="window.location.href='tel:0771122334'">اتصل الآن</button>
+            <button class="whatsapp-btn" onclick="window.open('https://wa.me/962771122334', '_blank')">راسل عبر واتساب</button>
+          </div>
+        </div>
+        <p>نجار محترف بخبرة طويلة في الأثاث الخشبي.</p>
+        <div class="details">
+          <p><strong>رقم الهاتف:</strong> 0771122334</p>
+          <p><strong>مكان السكن:</strong> إربد</p>
+          <p><strong>المهنة:</strong> نجار</p>
+        </div>
+      </div>
+
+      <!-- هنا سيتم إضافة الأشخاص من Firebase -->
+
+    </div>
 
     <div class="register-box">
       <p>هل ترغب بإضافة معلوماتك إلى القائمة؟</p>
@@ -36,130 +96,98 @@
     </div>
   </div>
 
-  <script>
-    const personList = document.getElementById('personList');
+  <!-- Firebase + JavaScript -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 
-    function createCard(person) {
-      const div = document.createElement('div');
-      div.classList.add('person');
-      div.setAttribute('data-city', person.city);
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj5YjdiruBTCfxDnxlDd4W6YA5iCWRfE4",
+      authDomain: "home-services-app-a9c5e.firebaseapp.com",
+      projectId: "home-services-app-a9c5e",
+      storageBucket: "home-services-app-a9c5e.appspot.com",
+      messagingSenderId: "287028219636",
+      appId: "1:287028219636:web:2ad4b0e092a2c007e318a1"
+    };
 
-      div.innerHTML = `
-        <div class="card-header">
-          <h2>${person.name}</h2>
-          <div class="actions">
-            <button class="open-btn">عرض التفاصيل</button>
-            <button class="close-btn hidden">إغلاق التفاصيل</button>
-            <button class="call-btn" onclick="window.location.href='tel:${person.phone}'">اتصل الآن</button>
-            <button class="whatsapp-btn" onclick="window.open('https://wa.me/962${person.phone.slice(1)}', '_blank')">راسل عبر واتساب</button>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const personList = document.getElementById("personList");
+
+    async function loadFirebasePersons() {
+      const querySnapshot = await getDocs(collection(db, "approvedUsers"));
+
+      querySnapshot.forEach((doc, index) => {
+        const data = doc.data();
+        const card = document.createElement("div");
+        card.className = "person visible";
+        card.setAttribute("data-city", data.city || "");
+
+        card.innerHTML = `
+          <div class="card-header">
+            <h2>${data.name}</h2>
+            <div class="actions">
+              <button class="open-btn">عرض التفاصيل</button>
+              <button class="close-btn hidden">إغلاق التفاصيل</button>
+              <button class="call-btn" onclick="window.location.href='tel:${data.phone}'">اتصل الآن</button>
+              <button class="whatsapp-btn" onclick="window.open('https://wa.me/962${data.phone.slice(1)}', '_blank')">راسل عبر واتساب</button>
+            </div>
           </div>
-        </div>
-        <p>${person.bio}</p>
-        <div class="details">
-          <p><strong>رقم الهاتف:</strong> ${person.phone}</p>
-          <p><strong>مكان السكن:</strong> ${person.city}</p>
-          <p><strong>المهنة:</strong> ${person.job}</p>
-        </div>
-      `;
+          <p>${data.bio || "لا يوجد وصف"}</p>
+          <div class="details">
+            <p><strong>رقم الهاتف:</strong> ${data.phone}</p>
+            <p><strong>مكان السكن:</strong> ${data.city}</p>
+            <p><strong>المهنة:</strong> ${data.job}</p>
+          </div>
+        `;
 
-      personList.appendChild(div);
-
-      const openBtn = div.querySelector('.open-btn');
-      const closeBtn = div.querySelector('.close-btn');
-      const details = div.querySelector('.details');
-
-      openBtn.addEventListener('click', () => {
-        details.classList.add('show');
-        openBtn.classList.add('hidden');
-        closeBtn.classList.remove('hidden');
+        personList.appendChild(card);
       });
 
-      closeBtn.addEventListener('click', () => {
-        details.classList.remove('show');
-        closeBtn.classList.add('hidden');
-        openBtn.classList.remove('hidden');
-      });
+      setupDetailsButtons();
     }
 
-    function loadApprovedUsers() {
-      const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+    function setupDetailsButtons() {
+      document.querySelectorAll(".person").forEach((card) => {
+        const openBtn = card.querySelector(".open-btn");
+        const closeBtn = card.querySelector(".close-btn");
+        const details = card.querySelector(".details");
 
-      const originalUsers = [
-        {
-          name: 'محمد',
-          phone: '0791234567',
-          job: 'مصمم جرافيك',
-          city: 'عمان',
-          bio: 'مصمم جرافيك محترف يعمل في شركة تصميم.'
-        },
-        {
-          name: 'ليلى',
-          phone: '0789876543',
-          job: 'مطور ويب',
-          city: 'الزرقاء',
-          bio: 'مطور ويب تهتم بإنشاء مواقع حديثة.'
-        },
-        {
-          name: 'أحمد',
-          phone: '0771122334',
-          job: 'نجار',
-          city: 'إربد',
-          bio: 'نجار محترف بخبرة طويلة في الأثاث الخشبي.'
-        },
-        {
-          name: 'سارة',
-          phone: '0799988776',
-          job: 'كاتبة محتوى',
-          city: 'السلط',
-          bio: 'كاتبة محتوى وصحفية حرة.'
-        },
-        {
-          name: 'مازن',
-          phone: '0782211344',
-          job: 'حداد',
-          city: 'مادبا',
-          bio: 'حداد يعمل في تصنيع الأبواب والنوافذ الحديدية.'
-        },
-        {
-          name: 'زياد',
-          phone: '0795544332',
-          job: 'نجار',
-          city: 'الكرك',
-          bio: 'نجار محترف في صناعة الأثاث المنزلي والمكتبي.'
-        }
-      ];
+        openBtn.addEventListener("click", () => {
+          details.classList.add("show");
+          openBtn.classList.add("hidden");
+          closeBtn.classList.remove("hidden");
+        });
 
-      const allUsers = [...originalUsers, ...approvedUsers];
-
-      allUsers.forEach(createCard);
+        closeBtn.addEventListener("click", () => {
+          details.classList.remove("show");
+          closeBtn.classList.add("hidden");
+          openBtn.classList.remove("hidden");
+        });
+      });
     }
 
     function filterPersons() {
-      const searchValue = document.getElementById('searchInput').value.toLowerCase();
-      const cityValue = document.getElementById('citySelect').value;
-      const persons = document.querySelectorAll('.person');
+      const searchValue = document.getElementById("searchInput").value.toLowerCase();
+      const cityValue = document.getElementById("citySelect").value;
+      const persons = document.querySelectorAll(".person");
 
-      persons.forEach(person => {
+      persons.forEach((person) => {
         const text = person.textContent.toLowerCase();
-        const city = person.getAttribute('data-city');
+        const city = person.getAttribute("data-city");
         const matchesSearch = text.includes(searchValue);
-        const matchesCity = cityValue === '' || city === cityValue;
-        person.style.display = matchesSearch && matchesCity ? 'block' : 'none';
+        const matchesCity = cityValue === "" || city === cityValue;
+        person.style.display = matchesSearch && matchesCity ? "block" : "none";
       });
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadApprovedUsers();
+    document.getElementById("searchInput").addEventListener("input", filterPersons);
+    document.getElementById("citySelect").addEventListener("change", filterPersons);
 
-      const persons = document.querySelectorAll('.person');
-      persons.forEach((person, index) => {
-        setTimeout(() => {
-          person.classList.add('visible');
-        }, index * 150);
-      });
-
-      document.getElementById('searchInput').addEventListener('input', filterPersons);
-      document.getElementById('citySelect').addEventListener('change', filterPersons);
+    window.addEventListener("DOMContentLoaded", () => {
+      loadFirebasePersons();
+      setupDetailsButtons();
     });
   </script>
 </body>
