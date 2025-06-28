@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>البحث عن الأشخاص حسب المهنة والمنطقة</title>
+  <link rel="stylesheet" href="project.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>البحث حسب المهنة والمنطقة</h1>
+
+    <div class="filter-container">
+      <input type="text" id="searchInput" placeholder="اكتب المهنة مثل: نجار، حداد..." />
+      <select id="citySelect">
+        <option value="">جميع المحافظات</option>
+        <option value="عمان">عمان</option>
+        <option value="الزرقاء">الزرقاء</option>
+        <option value="إربد">إربد</option>
+        <option value="البلقاء">البلقاء</option>
+        <option value="المفرق">المفرق</option>
+        <option value="الكرك">الكرك</option>
+        <option value="معان">معان</option>
+        <option value="الطفيلة">الطفيلة</option>
+        <option value="العقبة">العقبة</option>
+        <option value="السلط">السلط</option>
+        <option value="مادبا">مادبا</option>
+      </select>
+    </div>
+
+    <div id="personList"></div>
+
+    <div class="register-box">
+      <p>هل ترغب بإضافة معلوماتك إلى القائمة؟</p>
+      <a href="register.html" class="register-button">سجل مهنتك الآن</a>
+    </div>
+  </div>
+
+  <script>
+    const personList = document.getElementById('personList');
+
+    function createCard(person) {
+      const div = document.createElement('div');
+      div.classList.add('person');
+      div.setAttribute('data-city', person.city);
+
+      div.innerHTML = `
+        <div class="card-header">
+          <h2>${person.name}</h2>
+          <div class="actions">
+            <button class="open-btn">عرض التفاصيل</button>
+            <button class="close-btn hidden">إغلاق التفاصيل</button>
+            <button class="call-btn" onclick="window.location.href='tel:${person.phone}'">اتصل الآن</button>
+            <button class="whatsapp-btn" onclick="window.open('https://wa.me/962${person.phone.slice(1)}', '_blank')">راسل عبر واتساب</button>
+          </div>
+        </div>
+        <p>${person.bio}</p>
+        <div class="details">
+          <p><strong>رقم الهاتف:</strong> ${person.phone}</p>
+          <p><strong>مكان السكن:</strong> ${person.city}</p>
+          <p><strong>المهنة:</strong> ${person.job}</p>
+        </div>
+      `;
+
+      personList.appendChild(div);
+
+      const openBtn = div.querySelector('.open-btn');
+      const closeBtn = div.querySelector('.close-btn');
+      const details = div.querySelector('.details');
+
+      openBtn.addEventListener('click', () => {
+        details.classList.add('show');
+        openBtn.classList.add('hidden');
+        closeBtn.classList.remove('hidden');
+      });
+
+      closeBtn.addEventListener('click', () => {
+        details.classList.remove('show');
+        closeBtn.classList.add('hidden');
+        openBtn.classList.remove('hidden');
+      });
+    }
+
+    function loadApprovedUsers() {
+      const approvedUsers = JSON.parse(localStorage.getItem('approvedUsers') || '[]');
+
+      const originalUsers = [
+        {
+          name: 'محمد',
+          phone: '0791234567',
+          job: 'مصمم جرافيك',
+          city: 'عمان',
+          bio: 'مصمم جرافيك محترف يعمل في شركة تصميم.'
+        },
+        {
+          name: 'ليلى',
+          phone: '0789876543',
+          job: 'مطور ويب',
+          city: 'الزرقاء',
+          bio: 'مطور ويب تهتم بإنشاء مواقع حديثة.'
+        },
+        {
+          name: 'أحمد',
+          phone: '0771122334',
+          job: 'نجار',
+          city: 'إربد',
+          bio: 'نجار محترف بخبرة طويلة في الأثاث الخشبي.'
+        },
+        {
+          name: 'سارة',
+          phone: '0799988776',
+          job: 'كاتبة محتوى',
+          city: 'السلط',
+          bio: 'كاتبة محتوى وصحفية حرة.'
+        },
+        {
+          name: 'مازن',
+          phone: '0782211344',
+          job: 'حداد',
+          city: 'مادبا',
+          bio: 'حداد يعمل في تصنيع الأبواب والنوافذ الحديدية.'
+        },
+        {
+          name: 'زياد',
+          phone: '0795544332',
+          job: 'نجار',
+          city: 'الكرك',
+          bio: 'نجار محترف في صناعة الأثاث المنزلي والمكتبي.'
+        }
+      ];
+
+      const allUsers = [...originalUsers, ...approvedUsers];
+
+      allUsers.forEach(createCard);
+    }
+
+    function filterPersons() {
+      const searchValue = document.getElementById('searchInput').value.toLowerCase();
+      const cityValue = document.getElementById('citySelect').value;
+      const persons = document.querySelectorAll('.person');
+
+      persons.forEach(person => {
+        const text = person.textContent.toLowerCase();
+        const city = person.getAttribute('data-city');
+        const matchesSearch = text.includes(searchValue);
+        const matchesCity = cityValue === '' || city === cityValue;
+        person.style.display = matchesSearch && matchesCity ? 'block' : 'none';
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadApprovedUsers();
+
+      const persons = document.querySelectorAll('.person');
+      persons.forEach((person, index) => {
+        setTimeout(() => {
+          person.classList.add('visible');
+        }, index * 150);
+      });
+
+      document.getElementById('searchInput').addEventListener('input', filterPersons);
+      document.getElementById('citySelect').addEventListener('change', filterPersons);
+    });
+  </script>
+</body>
+</html>

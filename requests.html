@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>طلبات التسجيل المعلقة</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      direction: rtl;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+    .request-card {
+      border: 1px solid #007bff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #fff;
+    }
+    .request-card p {
+      margin: 5px 0;
+    }
+    .buttons {
+      margin-top: 10px;
+    }
+    button.approve-btn {
+      background-color: #28a745;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button.approve-btn:hover {
+      background-color: #218838;
+    }
+    button.reject-btn {
+      background-color: #dc3545;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button.reject-btn:hover {
+      background-color: #c82333;
+    }
+    .empty-msg {
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>طلبات التسجيل المعلقة</h1>
+    <div id="requestsContainer"></div>
+    <p id="emptyMessage" class="empty-msg" style="display:none;">لا توجد طلبات معلقة حالياً.</p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      deleteDoc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj5YjdiruBTCfxDnxlDd4W6YA5iCWRfE4",
+      authDomain: "home-services-app-a9c5e.firebaseapp.com",
+      projectId: "home-services-app-a9c5e",
+      storageBucket: "home-services-app-a9c5e.appspot.com",
+      messagingSenderId: "287028219636",
+      appId: "1:287028219636:web:2ad4b0e092a2c007e318a1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const requestsContainer = document.getElementById('requestsContainer');
+    const emptyMessage = document.getElementById('emptyMessage');
+
+    async function loadPendingUsers() {
+      requestsContainer.innerHTML = '';
+
+      const querySnapshot = await getDocs(collection(db, "pendingUsers"));
+      if (querySnapshot.empty) {
+        emptyMessage.style.display = 'block';
+        return;
+      }
+      emptyMessage.style.display = 'none';
+
+      querySnapshot.forEach((docSnap) => {
+        const user = docSnap.data();
+        const docId = docSnap.id;
+
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.innerHTML = `
+          <p><strong>الاسم:</strong> ${user.name}</p>
+          <p><strong>رقم الهاتف:</strong> ${user.phone}</p>
+          <p><strong>المهنة:</strong> ${user.job}</p>
+          <p><strong>اسم  المحافظة:</strong> ${user.city}</p>
+         <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
+          <p><strong>الرقم الوطني:</strong> ${user.nationalId}</p>
+          <p><strong>الوصف:</strong> ${user.bio || '-'}</p>
+          <div class="buttons">
+            <button class="approve-btn">قبول</button>
+            <button class="reject-btn">رفض</button>
+          </div>
+        `;
+
+        requestsContainer.appendChild(card);
+
+        card.querySelector('.approve-btn').addEventListener('click', () => approveUser(docId, user));
+        card.querySelector('.reject-btn').addEventListener('click', () => rejectUser(docId));
+      });
+    }
+
+    async function approveUser(docId, user) {
+      try {
+        // أضف المستخدم لمجموعة approvedUsers
+        await setDoc(doc(db, "approvedUsers", docId), {
+          ...user,
+          status: "approved",
+          approvedAt: serverTimestamp()
+        });
+
+        // احذف من pendingUsers
+        await deleteDoc(doc(db, "pendingUsers", docId));
+
+        alert(`تم قبول ${user.name} وإضافته إلى الموقع.`);
+        loadPendingUsers();
+      } catch (error) {
+        alert("حدث خطأ أثناء القبول.");
+        console.error(error);
+      }
+    }
+
+    async function rejectUser(docId) {
+      try {
+        await deleteDoc(doc(db, "pendingUsers", docId));
+        alert("تم رفض الطلب وحذفه.");
+        loadPendingUsers();
+      } catch (error) {
+        alert("حدث خطأ أثناء الرفض.");
+        console.error(error);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadPendingUsers);
+  </script>
+</body>
+</html>
