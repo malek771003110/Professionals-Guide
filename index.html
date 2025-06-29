@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="project.css" />
 </head>
 <body>
+  
+  <div class="hero"></div>
+
   <div class="container">
     <h1>البحث حسب المهنة والمنطقة</h1>
 
@@ -189,6 +192,34 @@
       loadFirebasePersons();
       setupDetailsButtons();
     });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      setTimeout(() => {
+        hero.classList.add('show');
+      }, 300); // تأخير بسيط للأنميشن
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+  // سلاسة للعناصر العامة
+  const mainElements = [
+    document.querySelector('.container'),
+    document.querySelector('h1'),
+    document.querySelector('.filter-container'),
+    document.querySelector('.register-box')
+  ];
+
+  mainElements.forEach((el, i) => {
+    if (el) {
+      setTimeout(() => {
+        el.classList.add('visible');
+      }, i * 200);
+    }
+  });
+});
+
   </script>
 </body>
 </html>
