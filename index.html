@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-
+ 
   <header class="main-header">
   <div class="header-content">
     <h2><i class="fas fa-tools"></i> خدمات منزلية</h2>
@@ -105,12 +105,25 @@
 
     </div>
 
-    <div class="register-box">
-      <p><i class="fas fa-star"></i> هل ترغب بإضافة معلوماتك إلى القائمة؟</p>
-      <a href="register.html" class="register-button"><i class="fas fa-plus-circle"></i> سجل مهنتك الآن</a>
+   <div class="register-box">
+  <div class="register-content">
+    <div class="register-left">
+      <p>هل ترغب بإضافة معلوماتك إلى القائمة؟</p>
+      <a href="register.html" class="register-button">
+        <i class="fas fa-briefcase"></i> سجل مهنتك الآن
+      </a>
+    </div>
+    <div class="support-box">
+      <h3><i class="fas fa-headset"></i> للاستفسارات والشكاوى</h3>
+      <p><i class="fas fa-phone"></i> 0790000000</p>
+      <p><i class="fas fa-envelope"></i> support@example.com</p>
     </div>
   </div>
+</div>
 
+  </div>
+
+  
   <!-- Firebase + JavaScript -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
@@ -251,5 +264,6 @@ document.getElementById("resultsCount").textContent = `عدد النتائج: ${
 });
 
   </script>
+
 </body>
 </html>
