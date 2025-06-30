@@ -279,4 +279,47 @@ h1.visible,
   margin-top: 50px; /* أو أكثر إذا لزم */
 }
 
+.bottom-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  background-color: #111;
+  padding: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 30px;
+  border-radius: 10px;
+}
+
+.register-box,
+.support-box {
+  flex: 1 1 45%; /* يجعلهم بجانب بعض على كل الشاشات */
+  background-color: #222;
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+}
+
+.register-box a {
+  display: inline-block;
+  margin-top: 10px;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.register-box a:hover {
+  background-color: #218838;
+}
+
+@media (max-width: 500px) {
+  .register-box,
+  .support-box {
+    flex: 1 1 48%; /* على الموبايل يرجعوا تحت بعض إذا الشاشة ضيقة جدًا */
+  }
+}
 
