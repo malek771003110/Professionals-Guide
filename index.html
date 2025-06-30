@@ -40,6 +40,9 @@
       </select>
     </div>
 
+<p id="resultsCount">عدد النتائج: 0</p>
+
+
     <div id="personList">
 
       <!-- الأشخاص الأصليين -->
@@ -192,6 +195,24 @@
         const matchesCity = cityValue === "" || city === cityValue;
         person.style.display = matchesSearch && matchesCity ? "block" : "none";
       });
+let visibleCount = 0;
+
+persons.forEach((person) => {
+  const text = person.textContent.toLowerCase();
+  const city = person.getAttribute("data-city");
+  const matchesSearch = text.includes(searchValue);
+  const matchesCity = cityValue === "" || city === cityValue;
+
+  const isVisible = matchesSearch && matchesCity;
+  person.style.display = isVisible ? "block" : "none";
+
+  if (isVisible) visibleCount++;
+});
+
+// تحديث العدد الظاهر
+document.getElementById("resultsCount").textContent = `عدد النتائج: ${visibleCount}`;
+
+
     }
 
     document.getElementById("searchInput").addEventListener("input", filterPersons);
