@@ -32,15 +32,75 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #0056b3;
     }
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
     #message {
-      color: green;
       display: none;
       margin-top: 10px;
       font-weight: bold;
+    }
+    #message.success {
+      color: green;
+    }
+    #message.error {
+      color: red;
+    }
+
+    .send-button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      transition: 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .send-button:hover:not(:disabled) {
+      background-color: #218838;
+      box-shadow: 0 0 12px 3px rgba(40, 167, 69, 0.5);
+      transform: scale(1.03);
+    }
+
+    .reset-button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      transition: 0.4s ease;
+      margin-top: 0;
+    }
+    .reset-button:hover {
+      background-color: #c82333;
+      box-shadow: 0 0 12px 3px rgba(220, 53, 69, 0.5);
+      transform: scale(1.03);
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    small {
+      color: #666;
+      font-size: 12px;
+      display: block;
+      margin-top: -6px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -52,13 +112,26 @@
       <input type="text" id="name" required />
 
       <label>رقم الهاتف:</label>
-      <input type="tel" id="phone" required />
+      <input type="tel" id="phone" required pattern="07\d{8}" />
 
       <label>المهنة:</label>
       <input type="text" id="job" required />
 
-      <label>اسم  المحافظة:</label>
-      <input type="text" id="city" required />
+      <label>المحافظة:</label>
+      <select id="city" required>
+        <option value="">اختر المحافظة</option>
+        <option value="عمان">عمان</option>
+        <option value="الزرقاء">الزرقاء</option>
+        <option value="إربد">إربد</option>
+        <option value="البلقاء">البلقاء</option>
+        <option value="المفرق">المفرق</option>
+        <option value="الكرك">الكرك</option>
+        <option value="معان">معان</option>
+        <option value="الطفيلة">الطفيلة</option>
+        <option value="العقبة">العقبة</option>
+        <option value="السلط">السلط</option>
+        <option value="مادبا">مادبا</option>
+      </select>
 
       <label>الرقم الوطني:</label>
       <input type="tel" id="nationalId" required />
@@ -67,11 +140,14 @@
       <input type="email" id="email" required />
 
       <label>وصف مختصر:</label>
-      <textarea id="bio" rows="3"></textarea>
+      <textarea id="bio" rows="3" ></textarea>
 
-      <button type="submit">إرسال</button>
+      <button type="submit" class="send-button">
+        <i class="fas fa-paper-plane"></i> إرسال
+      </button>
+      <button type="reset" class="reset-button">إعادة تعيين</button>
     </form>
-    <p id="message">تم إرسال طلبك وسيتم مراجعته.</p>
+    <p id="message"></p>
   </div>
 
   <!-- Firebase SDK -->
@@ -93,9 +169,25 @@
 
     const form = document.getElementById('registerForm');
     const message = document.getElementById('message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const phoneInput = form.phone;
+
+    // تحقق فوري من رقم الهاتف
+    phoneInput.addEventListener('input', () => {
+      const phonePattern = /^07\d{8}$/;
+      if (!phonePattern.test(phoneInput.value)) {
+        phoneInput.setCustomValidity('يرجى إدخال رقم هاتف صحيح يبدأ بـ 07 ويتكون من 10 أرقام');
+      } else {
+        phoneInput.setCustomValidity('');
+      }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // تعطيل الزر وإظهار تحميل
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري الإرسال...';
 
       const newUser = {
         name: form.name.value.trim(),
@@ -111,13 +203,23 @@
 
       try {
         await addDoc(collection(db, "pendingUsers"), newUser);
+        message.className = 'success';
+        message.textContent = 'تم إرسال طلبك وسيتم مراجعته.';
         message.style.display = 'block';
         form.reset();
       } catch (error) {
-        alert("حدث خطأ أثناء الإرسال، حاول مرة أخرى.");
+        message.className = 'error';
+        message.textContent = 'حدث خطأ أثناء الإرسال، حاول مرة أخرى.';
+        message.style.display = 'block';
         console.error(error);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال';
       }
     });
   </script>
+
+  <!-- Font Awesome CDN -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
