@@ -327,8 +327,29 @@ h1.visible,
   background-color: #007bff;
   color: white;
   font-weight: bold;
-  padding: 8px 0;
-  text-align: center;
+  padding: 4px 0;
   font-size: 15px;
   border-bottom: 2px solid #0056b3;
+  overflow: hidden;
+  position: relative;
+  height: 40px;
+}
+
+.scrolling-text {
+  position: absolute;
+  white-space: nowrap;
+  will-change: transform;
+  animation: scrollText 20s linear infinite;
+  padding-left: 100%;
+}
+
+
+/* ⚙️ تحكم بالسرعة عبر تغيير المدة */
+@keyframes scrollText {
+  0% {
+    transform: translateX(-53%);
+  }
+  100% {
+    transform: translateX(53%);
+  }
 }
