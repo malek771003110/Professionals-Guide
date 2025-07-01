@@ -276,7 +276,7 @@ h1.visible,
 }
 
 .hero {
-  margin-top: 50px; /* أو أكثر إذا لزم */
+  margin-top: 40px; /* أو أكثر إذا لزم */
 }
 
 .bottom-section {
@@ -347,9 +347,9 @@ h1.visible,
 /* ⚙️ تحكم بالسرعة عبر تغيير المدة */
 @keyframes scrollText {
   0% {
-    transform: translateX(-53%);
+    transform: translateX(-48%);
   }
   100% {
-    transform: translateX(53%);
+    transform: translateX(50%);
   }
 }
