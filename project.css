@@ -347,7 +347,7 @@ h1.visible,
 /* ⚙️ تحكم بالسرعة عبر تغيير المدة */
 @keyframes scrollText {
   0% {
-    transform: translateX(-44%);
+    transform: translateX(-41%);
   }
   100% {
     transform: translateX(50%);
