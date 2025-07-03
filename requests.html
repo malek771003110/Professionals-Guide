@@ -125,8 +125,8 @@
           <p><strong>الاسم:</strong> ${user.name}</p>
           <p><strong>رقم الهاتف:</strong> ${user.phone}</p>
           <p><strong>المهنة:</strong> ${user.job}</p>
-          <p><strong>اسم  المحافظة:</strong> ${user.city}</p>
-         <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
+          <p><strong>اسم المحافظة:</strong> ${user.city}</p>
+          <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
           <p><strong>الرقم الوطني:</strong> ${user.nationalId}</p>
           <p><strong>الوصف:</strong> ${user.bio || '-'}</p>
           <div class="buttons">
@@ -138,20 +138,18 @@
         requestsContainer.appendChild(card);
 
         card.querySelector('.approve-btn').addEventListener('click', () => approveUser(docId, user));
-        card.querySelector('.reject-btn').addEventListener('click', () => rejectUser(docId));
+        card.querySelector('.reject-btn').addEventListener('click', () => rejectUser(docId, user));
       });
     }
 
     async function approveUser(docId, user) {
       try {
-        // أضف المستخدم لمجموعة approvedUsers
-        await setDoc(doc(db, "approvedUsers", docId), {
+        await setDoc(doc(db, "approvedUsers", user.nationalId), {
           ...user,
           status: "approved",
           approvedAt: serverTimestamp()
         });
 
-        // احذف من pendingUsers
         await deleteDoc(doc(db, "pendingUsers", docId));
 
         alert(`تم قبول ${user.name} وإضافته إلى الموقع.`);
@@ -162,10 +160,21 @@
       }
     }
 
-    async function rejectUser(docId) {
+    async function rejectUser(docId, user) {
+      const reason = prompt("أدخل سبب الرفض:");
+      if (!reason) return;
+
       try {
+        await setDoc(doc(db, "rejectedUsers", user.nationalId), {
+          ...user,
+          status: "rejected",
+          reason,
+          rejectedAt: serverTimestamp()
+        });
+
         await deleteDoc(doc(db, "pendingUsers", docId));
-        alert("تم رفض الطلب وحذفه.");
+
+        alert("تم رفض الطلب مع تسجيل السبب.");
         loadPendingUsers();
       } catch (error) {
         alert("حدث خطأ أثناء الرفض.");
