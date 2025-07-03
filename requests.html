@@ -24,6 +24,21 @@
       margin-bottom: 20px;
       color: #007bff;
     }
+    .logout-btn {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
     .request-card {
       border: 1px solid #007bff;
       border-radius: 10px;
@@ -71,6 +86,9 @@
   </style>
 </head>
 <body>
+
+  <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+
   <div class="container">
     <h1>طلبات التسجيل المعلقة</h1>
     <div id="requestsContainer"></div>
@@ -79,6 +97,16 @@
 
   <!-- Firebase SDK -->
   <script type="module">
+    // تحقق من تسجيل الدخول
+    if (!localStorage.getItem('adminLoggedIn')) {
+      window.location.href = "admin-login.html";
+    }
+
+    function logout() {
+      localStorage.removeItem('adminLoggedIn');
+      window.location.href = "admin-login.html";
+    }
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
     import {
       getFirestore,
