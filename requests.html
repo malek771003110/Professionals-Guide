@@ -102,10 +102,10 @@
       window.location.href = "admin-login.html";
     }
 
-    function logout() {
-      localStorage.removeItem('adminLoggedIn');
-      window.location.href = "admin-login.html";
-    }
+  window.logout = function () {
+  localStorage.removeItem('adminLoggedIn');
+  window.location.href = "admin-login.html";
+};
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
     import {
