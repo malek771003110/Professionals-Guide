@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>التحقق من حالة الطلب</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+      direction: rtl;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ccc;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .accepted {
+      color: green;
+    }
+
+    .rejected {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>تحقق من حالة طلبك</h2>
+    <input type="text" id="nationalIdInput" placeholder="أدخل الرقم الوطني" />
+    <button id="checkBtn">تحقق</button>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj5YjdiruBTCfxDnxlDd4W6YA5iCWRfE4",
+      authDomain: "home-services-app-a9c5e.firebaseapp.com",
+      projectId: "home-services-app-a9c5e",
+      storageBucket: "home-services-app-a9c5e.appspot.com",
+      messagingSenderId: "287028219636",
+      appId: "1:287028219636:web:2ad4b0e092a2c007e318a1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const checkBtn = document.getElementById("checkBtn");
+    const nationalIdInput = document.getElementById("nationalIdInput");
+    const resultDiv = document.getElementById("result");
+
+    checkBtn.addEventListener("click", async () => {
+      const nationalId = nationalIdInput.value.trim();
+      if (!nationalId) {
+        resultDiv.textContent = "يرجى إدخال الرقم الوطني.";
+        resultDiv.className = "result rejected";
+        return;
+      }
+
+      resultDiv.textContent = "جارٍ التحقق...";
+      resultDiv.className = "result";
+
+      try {
+        const approvedRef = doc(db, "approvedUsers", nationalId);
+        const rejectedRef = doc(db, "rejectedUsers", nationalId);
+
+        const approvedSnap = await getDoc(approvedRef);
+        const rejectedSnap = await getDoc(rejectedRef);
+
+        if (approvedSnap.exists()) {
+          resultDiv.innerHTML = "🎉 تم قبول طلبك!<br>الآن اسمك ظاهر في الموقع.";
+          resultDiv.className = "result accepted";
+        } else if (rejectedSnap.exists()) {
+          const reason = rejectedSnap.data().reason || "بدون سبب محدد";
+          resultDiv.innerHTML = `❌ تم رفض الطلب.<br>السبب: ${reason}`;
+          resultDiv.className = "result rejected";
+        } else {
+          resultDiv.textContent = "لم يتم العثور على طلب بهذا الرقم الوطني.";
+          resultDiv.className = "result rejected";
+        }
+      } catch (error) {
+        console.error(error);
+        resultDiv.textContent = "حدث خطأ أثناء التحقق.";
+        resultDiv.className = "result rejected";
+      }
+    });
+  </script>
+</body>
+</html>
