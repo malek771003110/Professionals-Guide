@@ -22,6 +22,12 @@
       box-shadow: 0 0 10px #ccc;
     }
 
+    .info-text {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
     input, button {
       width: 100%;
       padding: 12px;
@@ -42,8 +48,26 @@
       background-color: #0056b3;
     }
 
-    .result {
-      margin-top: 20px;
+   .card {
+  text-align: right;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 0 10px #bbb;
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.card.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+    .status {
+      margin-top: 15px;
       font-weight: bold;
       font-size: 18px;
     }
@@ -55,14 +79,35 @@
     .rejected {
       color: red;
     }
+
+    #retryBtn {
+      display: none;
+      margin-top: 15px;
+      background-color: #6c757d;
+    }
+
+    #retryBtn:hover {
+      background-color: #5a6268;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>تحقق من حالة طلبك</h2>
+    <p class="info-text">أدخل رقمك الوطني لتعرف حالة طلبك (تم القبول أو تم الرفض مع السبب).</p>
     <input type="tel" id="nationalIdInput" placeholder="أدخل الرقم الوطني" />
     <button id="checkBtn">تحقق</button>
-    <div id="result" class="result"></div>
+    
+    <div id="card" class="card">
+      <p><strong>الاسم:</strong> <span id="name"></span></p>
+      <p><strong>المهنة:</strong> <span id="job"></span></p>
+      <p><strong>المحافظة:</strong> <span id="city"></span></p>
+      <p><strong>البريد الإلكتروني:</strong> <span id="email"></span></p>
+      <p><strong>الرقم الوطني:</strong> <span id="nid"></span></p>
+      <div id="status" class="status"></div>
+    </div>
+
+    <button id="retryBtn">أعد المحاولة</button>
   </div>
 
   <script type="module">
@@ -81,20 +126,26 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const checkBtn = document.getElementById("checkBtn");
     const nationalIdInput = document.getElementById("nationalIdInput");
-    const resultDiv = document.getElementById("result");
+    const checkBtn = document.getElementById("checkBtn");
+    const retryBtn = document.getElementById("retryBtn");
+
+    const card = document.getElementById("card");
+    const name = document.getElementById("name");
+    const job = document.getElementById("job");
+    const city = document.getElementById("city");
+    const email = document.getElementById("email");
+    const nid = document.getElementById("nid");
+    const status = document.getElementById("status");
 
     checkBtn.addEventListener("click", async () => {
       const nationalId = nationalIdInput.value.trim();
       if (!nationalId) {
-        resultDiv.textContent = "يرجى إدخال الرقم الوطني.";
-        resultDiv.className = "result rejected";
+        status.innerHTML = "يرجى إدخال الرقم الوطني.";
+        status.className = "status rejected";
+        card.classList.add("show");
         return;
       }
-
-      resultDiv.textContent = "جارٍ التحقق...";
-      resultDiv.className = "result";
 
       try {
         const approvedRef = doc(db, "approvedUsers", nationalId);
@@ -104,21 +155,46 @@
         const rejectedSnap = await getDoc(rejectedRef);
 
         if (approvedSnap.exists()) {
-          resultDiv.innerHTML = "🎉 تم قبول طلبك!<br>الآن اسمك ظاهر في الموقع.";
-          resultDiv.className = "result accepted";
+          const data = approvedSnap.data();
+          name.textContent = data.name || "-";
+          job.textContent = data.job || "-";
+          city.textContent = data.city || "-";
+          email.textContent = data.email || "-";
+          nid.textContent = nationalId;
+          status.innerHTML = "✅ تم قبول الطلب. اسمك الآن ظاهر في الموقع.";
+          status.className = "status accepted";
+          card.classList.add("show");
         } else if (rejectedSnap.exists()) {
-          const reason = rejectedSnap.data().reason || "بدون سبب محدد";
-          resultDiv.innerHTML = `❌ تم رفض الطلب.<br>السبب: ${reason}`;
-          resultDiv.className = "result rejected";
+          const data = rejectedSnap.data();
+          name.textContent = data.name || "-";
+          job.textContent = data.job || "-";
+          city.textContent = data.city || "-";
+          email.textContent = data.email || "-";
+          nid.textContent = nationalId;
+          const reason = data.reason || "بدون سبب محدد";
+          status.innerHTML = `❌ تم رفض الطلب.<br>السبب: ${reason}`;
+          status.className = "status rejected";
+          card.classList.add("show");
         } else {
-          resultDiv.textContent = "لم يتم العثور على طلب بهذا الرقم الوطني.";
-          resultDiv.className = "result rejected";
+          status.innerHTML = "❗ لم يتم العثور على طلب بهذا الرقم الوطني.";
+          status.className = "status rejected";
+          card.classList.add("show");
         }
+
+        retryBtn.style.display = "inline-block";
       } catch (error) {
         console.error(error);
-        resultDiv.textContent = "حدث خطأ أثناء التحقق.";
-        resultDiv.className = "result rejected";
+        status.textContent = "حدث خطأ أثناء التحقق.";
+        status.className = "status rejected";
+        card.classList.add("show");
+        retryBtn.style.display = "inline-block";
       }
+    });
+
+    retryBtn.addEventListener("click", () => {
+      nationalIdInput.value = "";
+      card.classList.remove("show");
+      retryBtn.style.display = "none";
     });
   </script>
 </body>
