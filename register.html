@@ -145,7 +145,6 @@
       <button type="submit" class="send-button">
         <i class="fas fa-paper-plane"></i> إرسال
       </button>
-      <button type="reset" class="reset-button">إعادة تعيين</button>
     </form>
     <p id="message"></p>
   </div>
@@ -204,9 +203,13 @@
       try {
         await addDoc(collection(db, "pendingUsers"), newUser);
         message.className = 'success';
-        message.textContent = 'تم إرسال طلبك وسيتم مراجعته.';
-        message.style.display = 'block';
-        form.reset();
+       message.innerHTML = `
+  تم إرسال طلبك وسيتم مراجعته.<br>
+  <a href="verify.html" style="color: #007bff; text-decoration: underline;">اضغط هنا للتحقق من حالة طلبك لاحقاً</a>
+`;
+message.style.display = 'block';
+form.reset();
+
       } catch (error) {
         message.className = 'error';
         message.textContent = 'حدث خطأ أثناء الإرسال، حاول مرة أخرى.';
