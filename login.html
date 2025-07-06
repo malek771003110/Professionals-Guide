@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل دخول المهني</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>تسجيل دخول المهني</h2>
+
+    <label for="nationalIdInput">الرقم الوطني:</label>
+    <input type="text" id="nationalIdInput" placeholder="مثال: 1234567890">
+
+    <button id="loginBtn">تسجيل الدخول</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCj5YjdiruBTCfxDnxlDd4W6YA5iCWRfE4",
+      authDomain: "home-services-app-a9c5e.firebaseapp.com",
+      projectId: "home-services-app-a9c5e",
+      storageBucket: "home-services-app-a9c5e.appspot.com",
+      messagingSenderId: "287028219636",
+      appId: "1:287028219636:web:2ad4b0e092a2c007e318a1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const nationalIdInput = document.getElementById("nationalIdInput");
+
+    loginBtn.addEventListener("click", async () => {
+      const nationalId = nationalIdInput.value.trim();
+      if (!nationalId) {
+        alert("يرجى إدخال الرقم الوطني.");
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "approvedUsers", nationalId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          // الرقم الوطني صحيح → حفظ وتوجيه
+          localStorage.setItem("loggedNationalId", nationalId);
+          window.location.href = "profile.html";
+        } else {
+          alert("الرقم الوطني غير موجود أو لم يتم قبوله بعد.");
+        }
+      } catch (error) {
+        alert("حدث خطأ أثناء تسجيل الدخول.");
+        console.error(error);
+      }
+    });
+  </script>
+
+</body>
+</html>
