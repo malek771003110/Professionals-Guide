@@ -7,6 +7,37 @@
   <link rel="stylesheet" href="project.css" />
   <!-- رابط Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* تنسيق الحالة */
+    .status {
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: 0.9rem;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+    .status.available {
+      color: green;
+    }
+    .status.busy {
+      color: red;
+    }
+    .status .circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status.available .circle {
+      background-color: green;
+    }
+    .status.busy .circle {
+      background-color: red;
+    }
+  </style>
 </head>
 <body>
  
@@ -15,18 +46,17 @@
     <h2><i class="fas fa-tools"></i> خدمات منزلية</h2>
     <a href="register.html" class="header-register-btn"><i class="fas fa-plus-circle"></i> سجل مهنتك الآن</a>
   </div>
+
 </header>
+
 
   <div class="hero"></div>
 
 <div class="promo-bar">
   <div class="scrolling-text">
-       
     ✨ هل تبحث عن مهني موثوق؟ 🔍 أو ترغب بعرض مهنتك مجانًا؟ 💼 سجّل الآن أو ابحث بسهولة بين أفضل المهنيين في منطقتك!
   </div>
 </div>
-
-
 
   <div class="container">
     <h1><i class="fas fa-search"></i> البحث حسب المهنة والمنطقة</h1>
@@ -51,14 +81,15 @@
 
 <p id="resultsCount">عدد النتائج: 0</p>
 
-
     <div id="personList">
 
       <!-- الأشخاص الأصليين -->
-
-      <div class="person visible" data-city="عمان">
+      <div class="person visible" data-city="عمان" data-status="available">
         <div class="card-header">
-          <h2>محمد <i class="fas fa-user"></i></h2>
+          <h2>
+            محمد <i class="fas fa-user"></i>
+            <span class="status available"><span class="circle"></span> شواغر حالياً </span>
+          </h2>
           <div class="actions">
             <button class="open-btn"><i class="fas fa-eye"></i> عرض التفاصيل</button>
             <button class="close-btn hidden"><i class="fas fa-times"></i> إغلاق التفاصيل</button>
@@ -74,9 +105,12 @@
         </div>
       </div>
 
-      <div class="person visible" data-city="الزرقاء">
+      <div class="person visible" data-city="الزرقاء" data-status="busy">
         <div class="card-header">
-          <h2>ليلى <i class="fas fa-user"></i></h2>
+          <h2>
+            ليلى <i class="fas fa-user"></i>
+            <span class="status busy"><span class="circle"></span> مشغول </span>
+          </h2>
           <div class="actions">
             <button class="open-btn"><i class="fas fa-eye"></i> عرض التفاصيل</button>
             <button class="close-btn hidden"><i class="fas fa-times"></i> إغلاق التفاصيل</button>
@@ -92,9 +126,12 @@
         </div>
       </div>
 
-      <div class="person visible" data-city="إربد">
+      <div class="person visible" data-city="إربد" data-status="available">
         <div class="card-header">
-          <h2>أحمد <i class="fas fa-user"></i></h2>
+          <h2>
+            أحمد <i class="fas fa-user"></i>
+            <span class="status available"><span class="circle"></span> شواغر حالياً </span>
+          </h2>
           <div class="actions">
             <button class="open-btn"><i class="fas fa-eye"></i> عرض التفاصيل</button>
             <button class="close-btn hidden"><i class="fas fa-times"></i> إغلاق التفاصيل</button>
@@ -122,7 +159,11 @@
         <i class="fas fa-briefcase"></i> سجل مهنتك الآن
       </a>
 
-<a href="verify.html" class="check-status-link">تحقق من حالة طلبك</a>
+      <a href="verify.html" class="check-status-link">تحقق من حالة طلبك</a>
+
+
+  <a href="login.html" class="login-btn">لوحة الدخول</a>
+
 
 
     </div>
@@ -159,15 +200,23 @@
     async function loadFirebasePersons() {
       const querySnapshot = await getDocs(collection(db, "approvedUsers"));
 
-      querySnapshot.forEach((doc, index) => {
+      querySnapshot.forEach((doc) => {
         const data = doc.data();
+        const status = (data.status || "available").toLowerCase(); // الحالة من Firebase أو متاح بشكل افتراضي
+        const statusClass = status === "busy" ? "busy" : "available";
+        const statusText = status === "busy" ? "مشغول " : "شواغر حالياً ";
+
         const card = document.createElement("div");
         card.className = "person visible";
         card.setAttribute("data-city", data.city || "");
+        card.setAttribute("data-status", statusClass);
 
         card.innerHTML = `
           <div class="card-header">
-            <h2>${data.name} <i class="fas fa-user"></i></h2>
+            <h2>
+              ${data.name} <i class="fas fa-user"></i>
+              <span class="status ${statusClass}"><span class="circle"></span> ${statusText}</span>
+            </h2>
             <div class="actions">
               <button class="open-btn"><i class="fas fa-eye"></i> عرض التفاصيل</button>
               <button class="close-btn hidden"><i class="fas fa-times"></i> إغلاق التفاصيل</button>
@@ -214,31 +263,22 @@
       const cityValue = document.getElementById("citySelect").value;
       const persons = document.querySelectorAll(".person");
 
+      let visibleCount = 0;
+
       persons.forEach((person) => {
         const text = person.textContent.toLowerCase();
         const city = person.getAttribute("data-city");
         const matchesSearch = text.includes(searchValue);
         const matchesCity = cityValue === "" || city === cityValue;
-        person.style.display = matchesSearch && matchesCity ? "block" : "none";
+
+        const isVisible = matchesSearch && matchesCity;
+        person.style.display = isVisible ? "block" : "none";
+
+        if (isVisible) visibleCount++;
       });
-let visibleCount = 0;
 
-persons.forEach((person) => {
-  const text = person.textContent.toLowerCase();
-  const city = person.getAttribute("data-city");
-  const matchesSearch = text.includes(searchValue);
-  const matchesCity = cityValue === "" || city === cityValue;
-
-  const isVisible = matchesSearch && matchesCity;
-  person.style.display = isVisible ? "block" : "none";
-
-  if (isVisible) visibleCount++;
-});
-
-// تحديث العدد الظاهر
-document.getElementById("resultsCount").textContent = `عدد النتائج: ${visibleCount}`;
-
-
+      // تحديث العدد الظاهر
+      document.getElementById("resultsCount").textContent = `عدد النتائج: ${visibleCount}`;
     }
 
     document.getElementById("searchInput").addEventListener("input", filterPersons);
@@ -249,32 +289,31 @@ document.getElementById("resultsCount").textContent = `عدد النتائج: ${
       setupDetailsButtons();
     });
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const hero = document.querySelector('.hero');
-    if (hero) {
-      setTimeout(() => {
-        hero.classList.add('show');
-      }, 300); // تأخير بسيط للأنميشن
-    }
-  });
+    window.addEventListener('DOMContentLoaded', () => {
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        setTimeout(() => {
+          hero.classList.add('show');
+        }, 300);
+      }
+    });
 
-  window.addEventListener('DOMContentLoaded', () => {
-  // سلاسة للعناصر العامة
-  const mainElements = [
-    document.querySelector('.container'),
-    document.querySelector('h1'),
-    document.querySelector('.filter-container'),
-    document.querySelector('.register-box')
-  ];
+    window.addEventListener('DOMContentLoaded', () => {
+      const mainElements = [
+        document.querySelector('.container'),
+        document.querySelector('h1'),
+        document.querySelector('.filter-container'),
+        document.querySelector('.register-box')
+      ];
 
-  mainElements.forEach((el, i) => {
-    if (el) {
-      setTimeout(() => {
-        el.classList.add('visible');
-      }, i * 200);
-    }
-  });
-});
+      mainElements.forEach((el, i) => {
+        if (el) {
+          setTimeout(() => {
+            el.classList.add('visible');
+          }, i * 200);
+        }
+      });
+    });
 
   </script>
 
