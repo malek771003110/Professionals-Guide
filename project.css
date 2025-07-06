@@ -353,3 +353,19 @@ h1.visible,
     transform: translateX(50%);
   }
 }
+
+
+.register-btn, .login-btn {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  margin: 5px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 15px;
+  transition: background-color 0.3s;
+}
+.register-btn:hover, .login-btn:hover {
+  background-color: #0056b3;
+}
